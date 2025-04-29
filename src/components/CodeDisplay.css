@@ -1,0 +1,25 @@
+.word-block {
+	display: inline-block;
+	padding: 2px 4px;
+	border-radius: 3px;
+	transition: background-color 0.2s ease;
+	color: #eee;
+}
+
+.word-block.pending {
+	background-color: transparent;
+}
+
+.word-block.typing {
+	background-color: #4a4a4a;
+}
+
+.word-block.correct {
+	background-color: #2ecc71;
+	color: #000;
+}
+
+.word-block.incorrect {
+	background-color: #e74c3c;
+	color: #000;
+}

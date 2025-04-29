@@ -1,0 +1,177 @@
+.multiplayer-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 2rem;
+	max-width: 800px;
+	margin: 0 auto;
+	background-color: #1e1e1e;
+	border-radius: 8px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.username-form {
+	width: 100%;
+	max-width: 400px;
+	padding: 2rem;
+	background-color: #2d2d2d;
+	border-radius: 8px;
+	text-align: center;
+}
+
+.username-form h2 {
+	color: #fff;
+	margin-bottom: 1.5rem;
+}
+
+.username-form input {
+	width: 100%;
+	padding: 0.8rem;
+	margin-bottom: 1rem;
+	border: 1px solid #444;
+	border-radius: 4px;
+	background-color: #1e1e1e;
+	color: #fff;
+	font-size: 1rem;
+}
+
+.username-form button {
+	width: 100%;
+	padding: 0.8rem;
+	background-color: #4caf50;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 1rem;
+	transition: background-color 0.3s;
+}
+
+.username-form button:hover {
+	background-color: #45a049;
+}
+
+.room-info {
+	width: 100%;
+	padding: 2rem;
+	background-color: #2d2d2d;
+	border-radius: 8px;
+	text-align: center;
+}
+
+.room-info h2 {
+	color: #fff;
+	margin-bottom: 1.5rem;
+}
+
+.room-link {
+	margin-bottom: 2rem;
+}
+
+.room-link p {
+	color: #ccc;
+	margin-bottom: 0.5rem;
+}
+
+.link-container {
+	display: flex;
+	gap: 0.5rem;
+}
+
+.link-container input {
+	flex: 1;
+	padding: 0.8rem;
+	border: 1px solid #444;
+	border-radius: 4px;
+	background-color: #1e1e1e;
+	color: #fff;
+	font-size: 0.9rem;
+}
+
+.copy-btn {
+	padding: 0.8rem 1.5rem;
+	background-color: #2196f3;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background-color 0.3s;
+}
+
+.copy-btn:hover {
+	background-color: #1976d2;
+}
+
+.players-list {
+	margin-bottom: 2rem;
+}
+
+.players-list h3 {
+	color: #fff;
+	margin-bottom: 1rem;
+}
+
+.players-list ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.players-list li {
+	padding: 0.8rem;
+	margin-bottom: 0.5rem;
+	background-color: #1e1e1e;
+	border-radius: 4px;
+	color: #fff;
+}
+
+.start-btn {
+	width: 100%;
+	padding: 1rem;
+	margin-bottom: 1rem;
+	background-color: #4caf50;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 1.1rem;
+	transition: background-color 0.3s;
+}
+
+.start-btn:hover:not(:disabled) {
+	background-color: #45a049;
+}
+
+.start-btn:disabled {
+	background-color: #666;
+	cursor: not-allowed;
+}
+
+.back-btn {
+	width: 100%;
+	padding: 1rem;
+	background-color: #f44336;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 1.1rem;
+	transition: background-color 0.3s;
+}
+
+.back-btn:hover {
+	background-color: #d32f2f;
+}
+
+.player-section {
+	width: 100%;
+	padding: 2rem;
+	background-color: #2d2d2d;
+	border-radius: 8px;
+}
+
+.player-section h2 {
+	color: #fff;
+	margin-bottom: 1.5rem;
+	text-align: center;
+}

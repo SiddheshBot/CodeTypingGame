@@ -49,21 +49,26 @@ body {
 }
 
 .start-button {
-	background-color: #61dafb;
-	color: #1e1e1e;
-	padding: 15px 30px;
-	font-size: 1.2rem;
+	background: #2ecc71;
+	color: #000;
 	border: none;
-	border-radius: 5px;
+	padding: 0.75rem 1.5rem;
+	border-radius: 4px;
 	cursor: pointer;
-	transition: all 0.3s ease;
-	margin: 20px auto;
-	display: block;
+	font-size: 1.1rem;
+	transition: background-color 0.2s ease;
 }
 
 .start-button:hover {
-	background-color: #4fa8c7;
-	transform: translateY(-2px);
+	background: #27ae60;
+}
+
+.start-button.multiplayer {
+	background: #3498db;
+}
+
+.start-button.multiplayer:hover {
+	background: #2980b9;
 }
 
 .game-header {
@@ -303,4 +308,11 @@ h1 {
 .timer-dropdown:focus {
 	outline: none;
 	border-color: #61dafb;
+}
+
+.mode-buttons {
+	display: flex;
+	gap: 1rem;
+	justify-content: center;
+	margin-top: 2rem;
 }
