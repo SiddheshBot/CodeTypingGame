@@ -18,8 +18,12 @@ app.use(express.static(path.join(__dirname, "../dist")));
 const server = http.createServer(app);
 const io = new Server(server, {
 	cors: {
-		origin: process.env.FRONTEND_URL || "http://localhost:5173",
+		origin: [
+			"https://code-typing-game-five.vercel.app",
+			"http://localhost:5173",
+		],
 		methods: ["GET", "POST"],
+		credentials: true,
 	},
 });
 

@@ -7,8 +7,9 @@ class WebSocketService {
 	}
 
 	connect(roomId) {
-		this.socket = io("http://localhost:3001", {
+		this.socket = io("https://code-typing-game-five.vercel.app", {
 			autoConnect: true,
+			transports: ["websocket", "polling"],
 		});
 
 		this.socket.on("connect", () => {
