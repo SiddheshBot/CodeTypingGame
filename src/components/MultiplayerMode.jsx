@@ -12,13 +12,13 @@ function MultiplayerMode({ snippet, onBack }) {
 	const [showCopiedMessage, setShowCopiedMessage] = useState(false);
 	const [showResults, setShowResults] = useState(false);
 	const [isHost, setIsHost] = useState(false);
+	const [roomId, setRoomId] = useState("");
 	const [gameStats, setGameStats] = useState({
 		wpm: 0,
 		accuracy: 100,
 		keystrokes: { total: 0, correct: 0, incorrect: 0 },
 	});
 	const [gameStarted, setGameStarted] = useState(false);
-	const [setRoomId] = useState("");
 
 	useEffect(() => {
 		const pathParts = window.location.pathname.split("/");
@@ -28,7 +28,7 @@ function MultiplayerMode({ snippet, onBack }) {
 		const isUserHost = !window.location.href.includes("/join/");
 		setIsHost(isUserHost);
 
-		const currentUrl = window.location.href;
+		const currentUrl = `${window.location.origin}/multiplayer/${roomIdFromUrl}`;
 		setRoomLink(currentUrl);
 
 		wsService.connect(roomIdFromUrl);
@@ -36,7 +36,7 @@ function MultiplayerMode({ snippet, onBack }) {
 			username: localStorage.getItem("username"),
 			isHost: isUserHost,
 		});
-	}, [setRoomId]);
+	}, []);
 
 	const copyRoomLink = () => {
 		navigator.clipboard.writeText(roomLink);

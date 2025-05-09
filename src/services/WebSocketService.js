@@ -4,17 +4,53 @@ class WebSocketService {
 	constructor() {
 		this.socket = null;
 		this.listeners = new Map();
+		this.reconnectAttempts = 0;
+		this.maxReconnectAttempts = 5;
 	}
 
 	connect(roomId) {
-		this.socket = io("https://code-typing-game-five.vercel.app", {
+		const serverUrl =
+			window.location.hostname === "localhost"
+				? "http://localhost:3001"
+				: "https://code-typing-game-five.vercel.app";
+
+		this.socket = io(serverUrl, {
+			path: "/api/socket.io",
 			autoConnect: true,
 			transports: ["websocket", "polling"],
+			reconnection: true,
+			reconnectionAttempts: this.maxReconnectAttempts,
+			reconnectionDelay: 1000,
+			timeout: 10000,
+			withCredentials: true,
 		});
 
 		this.socket.on("connect", () => {
 			console.log("Connected to server");
+			this.reconnectAttempts = 0;
 			this.socket.emit("join_room", { roomId });
+		});
+
+		this.socket.on("connect_error", (error) => {
+			console.error("Connection error:", error);
+			this.reconnectAttempts++;
+			if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+				console.error("Max reconnection attempts reached");
+				// Notify user about connection issues
+				if (this.listeners.has("connection_error")) {
+					this.listeners.get("connection_error").forEach((callback) => {
+						callback(error);
+					});
+				}
+			}
+		});
+
+		this.socket.on("disconnect", (reason) => {
+			console.log("Disconnected from server:", reason);
+			if (reason === "io server disconnect") {
+				// Server initiated disconnect, try to reconnect
+				this.socket.connect();
+			}
 		});
 
 		this.socket.on("player_assigned", (data) => {
