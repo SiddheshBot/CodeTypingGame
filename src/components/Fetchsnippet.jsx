@@ -46,140 +46,112 @@ function FetchRandomSnippet({ setSnippet, onSnippetFetched, language }) {
 		return paragraphs.join("\n\n");
 	};
 
-	useEffect(() => {
-		const fetchRandomSnippet = async () => {
-			try {
-				if (language === "text") {
-					// Generate random paragraphs for text mode
-					const paragraphs = generateRandomParagraph();
-					setSnippet(paragraphs);
-					setLoading(false);
-					onSnippetFetched();
-					return;
-				}
+	const MAX_RETRIES = 3;
 
-				const repoUrl = getRepoUrl(language);
-				const fileExtension = getFileExtension(language);
+	const fetchFileContent = async (file) => {
+		const response = await fetch(file.download_url);
+		if (!response.ok) {
+			throw new Error(`Failed to fetch file content: ${response.status}`);
+		}
+		return response.text();
+	};
 
-				console.log(`Fetching ${language} code from:`, repoUrl);
+	const processCodeContent = (rawCode) => {
+		const lines = rawCode.split("\n").filter((line) => line.trim() !== "");
+		const linesWithoutHeader = lines.slice(20); // Skip potential header comments
+		return linesWithoutHeader.map((line) => line.trimStart());
+	};
 
-				const response = await fetch(repoUrl);
-				if (!response.ok) {
-					throw new Error(`GitHub API error: ${response.status}`);
-				}
+	const getRandomSnippet = (processedLines) => {
+		if (processedLines.length > 10) {
+			const startIndex = Math.floor(
+				Math.random() * (processedLines.length - 10)
+			);
+			const selectedLines = processedLines.slice(startIndex, startIndex + 10);
+			return selectedLines.join("\n");
+		} else if (processedLines.length > 0) {
+			return processedLines.join("\n");
+		}
+		return "";
+	};
 
-				const files = await response.json();
-				console.log("Files found:", files);
+	const fetchRandomSnippet = async (retryCount = 0) => {
+		try {
+			if (language === "text") {
+				const paragraphs = generateRandomParagraph();
+				setSnippet(paragraphs);
+				setLoading(false);
+				onSnippetFetched();
+				return;
+			}
 
-				const codeFiles = files.filter(
-					(file) => file.type === "file" && file.name.endsWith(fileExtension)
-				);
+			const repoUrl = getRepoUrl(language);
+			const fileExtension = getFileExtension(language);
 
-				console.log(`Filtered ${language} files:`, codeFiles);
+			console.log(`Fetching ${language} code from:`, repoUrl);
 
-				if (codeFiles.length === 0) {
-					throw new Error(`No ${language} files found in the repository`);
-				}
+			const response = await fetch(repoUrl);
+			if (!response.ok) {
+				throw new Error(`GitHub API error: ${response.status}`);
+			}
 
+			const files = await response.json();
+			const codeFiles = files.filter(
+				(file) => file.type === "file" && file.name.endsWith(fileExtension)
+			);
+
+			if (codeFiles.length === 0) {
+				throw new Error(`No ${language} files found in the repository`);
+			}
+
+			let finalSnippet = "";
+			let attempts = 0;
+			const maxAttempts = 3;
+
+			while (finalSnippet.length < 500 && attempts < maxAttempts) {
 				const randomFile =
 					codeFiles[Math.floor(Math.random() * codeFiles.length)];
+				const rawCode = await fetchFileContent(randomFile);
+				const processedLines = processCodeContent(rawCode);
 
-				console.log("Selected file:", randomFile);
-
-				const rawResponse = await fetch(randomFile.download_url);
-				if (!rawResponse.ok) {
-					throw new Error(
-						`Failed to fetch file content: ${rawResponse.status}`
-					);
-				}
-
-				const rawCode = await rawResponse.text();
-				console.log("Raw code fetched successfully");
-
-				const lines = rawCode.split("\n").filter((line) => line.trim() !== "");
-
-				const linesWithoutHeader = lines.slice(20);
-
-				const processedLines = linesWithoutHeader.map((line) =>
-					line.trimStart()
-				);
-
-				let finalSnippet = "";
-				if (processedLines.length > 10) {
-					const startIndex = Math.floor(
-						Math.random() * (processedLines.length - 10)
-					);
-					const selectedLines = processedLines.slice(
-						startIndex,
-						startIndex + 10
-					);
-					finalSnippet = selectedLines.join("\n");
-				} else if (processedLines.length > 0) {
-					finalSnippet = processedLines.join("\n");
-				} else {
-					throw new Error("No valid code after skipping header");
-				}
-
-				// If snippet is less than 500 characters, fetch another snippet
-				if (finalSnippet.length < 500) {
-					console.log("Snippet too short, fetching additional snippet...");
-					console.log("Current snippet length:", finalSnippet.length);
-					console.log("Available files:", codeFiles.length);
-
-					// Get a different random file from the repository
-					const availableFiles = codeFiles.filter(
-						(file) => file.name !== randomFile.name
-					);
-					console.log("Available different files:", availableFiles.length);
-
-					if (availableFiles.length > 0) {
-						const anotherRandomFile =
-							availableFiles[Math.floor(Math.random() * availableFiles.length)];
-						console.log("Selected another file:", anotherRandomFile.name);
-
-						const anotherRawResponse = await fetch(
-							anotherRandomFile.download_url
-						);
-						if (anotherRawResponse.ok) {
-							const anotherRawCode = await anotherRawResponse.text();
-							const anotherLines = anotherRawCode
-								.split("\n")
-								.filter((line) => line.trim() !== "")
-								.slice(20)
-								.map((line) => line.trimStart());
-
-							if (anotherLines.length > 0) {
-								const anotherStartIndex = Math.floor(
-									Math.random() * (anotherLines.length - 10)
-								);
-								const anotherSelectedLines = anotherLines.slice(
-									anotherStartIndex,
-									anotherStartIndex + 10
-								);
-								const additionalSnippet = anotherSelectedLines.join("\n");
-								console.log(
-									"Additional snippet length:",
-									additionalSnippet.length
-								);
-								finalSnippet += "\n\n" + additionalSnippet;
-							} else {
-								console.log("No valid lines found in additional file");
-							}
-						} else {
-							console.log("Failed to fetch additional file content");
-						}
-					} else {
-						console.log("No other files available in the repository");
+				if (processedLines.length > 0) {
+					const snippet = getRandomSnippet(processedLines);
+					if (snippet.length > 0) {
+						finalSnippet += (finalSnippet ? "\n\n" : "") + snippet;
 					}
 				}
 
-				setSnippet(finalSnippet);
-				setLoading(false);
-				onSnippetFetched();
-			} catch (error) {
-				console.error(`Error fetching ${language} code:`, error);
-				const fallbackSnippets = {
-					python: `def hello_world():
+				attempts++;
+			}
+
+			if (finalSnippet.length === 0 && retryCount < MAX_RETRIES) {
+				console.log(
+					`No valid snippet found, retrying... (${
+						retryCount + 1
+					}/${MAX_RETRIES})`
+				);
+				return fetchRandomSnippet(retryCount + 1);
+			}
+
+			if (finalSnippet.length === 0) {
+				throw new Error(
+					"Could not find valid code snippets after multiple attempts"
+				);
+			}
+
+			setSnippet(finalSnippet);
+			setLoading(false);
+			onSnippetFetched();
+		} catch (error) {
+			console.error(`Error fetching ${language} code:`, error);
+			if (retryCount < MAX_RETRIES) {
+				console.log(`Retrying... (${retryCount + 1}/${MAX_RETRIES})`);
+				return fetchRandomSnippet(retryCount + 1);
+			}
+
+			// Use fallback snippets if all retries fail
+			const fallbackSnippets = {
+				python: `def hello_world():
 print("Hello, World!")
 return True
 
@@ -193,7 +165,7 @@ def factorial(n):
 if n == 0:
 return 1
 return n * factorial(n-1)`,
-					javascript: `function helloWorld() {
+				javascript: `function helloWorld() {
 console.log("Hello, World!");
 return true;
 }
@@ -210,7 +182,7 @@ function factorial(n) {
 if (n === 0) return 1;
 return n * factorial(n - 1);
 }`,
-					java: `public class HelloWorld {
+				java: `public class HelloWorld {
 public static void main(String[] args) {
 System.out.println("Hello, World!");
 }
@@ -228,15 +200,16 @@ if (n == 0) return 1;
 return n * factorial(n - 1);
 }
 }`,
-					text: generateRandomParagraph(),
-				};
+				text: generateRandomParagraph(),
+			};
 
-				setSnippet(fallbackSnippets[language] || fallbackSnippets.python);
-				setLoading(false);
-				onSnippetFetched();
-			}
-		};
+			setSnippet(fallbackSnippets[language] || fallbackSnippets.python);
+			setLoading(false);
+			onSnippetFetched();
+		}
+	};
 
+	useEffect(() => {
 		fetchRandomSnippet();
 	}, [setSnippet, onSnippetFetched, language]);
 

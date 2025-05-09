@@ -9,7 +9,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(cors());
+
+// CORS configuration
+const corsOptions = {
+	origin: ["https://code-typing-game-five.vercel.app", "http://localhost:5173"],
+	methods: ["GET", "POST", "OPTIONS"],
+	credentials: true,
+	allowedHeaders: ["Content-Type"],
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Serve static files from the dist directory
@@ -17,14 +26,12 @@ app.use(express.static(path.join(__dirname, "../dist")));
 
 const server = http.createServer(app);
 const io = new Server(server, {
-	cors: {
-		origin: [
-			"https://code-typing-game-five.vercel.app",
-			"http://localhost:5173",
-		],
-		methods: ["GET", "POST"],
-		credentials: true,
-	},
+	cors: corsOptions,
+	path: "/socket.io",
+	transports: ["websocket", "polling"],
+	pingTimeout: 60000,
+	pingInterval: 25000,
+	connectTimeout: 10000,
 });
 
 const rooms = new Map();
@@ -110,9 +117,10 @@ app.get("*", (req, res) => {
 	res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
-const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
-	console.log(`Server running on port ${PORT}`);
+// Use environment variable with fallback
+const port = process?.env?.PORT || 3001;
+server.listen(port, () => {
+	console.log(`Server running on port ${port}`);
 });
 
 export default app;
