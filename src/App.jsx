@@ -10,7 +10,6 @@ import TypingInput from "./components/TypingInput";
 import Stats from "./components/Stats";
 import FetchRandomSnippet from "./components/Fetchsnippet";
 import ResultsPopup from "./components/ResultsPopup";
-import MultiplayerMode from "./components/MultiplayerMode";
 import WaitingRoom from "./components/WaitingRoom";
 import PlayerRoom from "./components/PlayerRoom";
 import "./styles.css";
@@ -27,6 +26,8 @@ function App() {
 	const [selectedTimer, setSelectedTimer] = useState(30);
 	const [timeRemaining, setTimeRemaining] = useState(null);
 	const [showResults, setShowResults] = useState(false);
+	const [countdown, setCountdown] = useState(3);
+	const [isCountdownActive, setIsCountdownActive] = useState(false);
 	const [keystrokes, setKeystrokes] = useState({
 		total: 0,
 		correct: 0,
@@ -64,13 +65,14 @@ function App() {
 
 	const startGame = () => {
 		setTypedText("");
-		setStartTime(Date.now());
-		setGameStarted(true);
+		setWpm(0);
+		setAccuracy(100);
 		setShouldFetchSnippet(true);
 		setTimeRemaining(selectedTimer);
 		setKeystrokes({ total: 0, correct: 0, incorrect: 0 });
-		setWpm(0);
-		setAccuracy(100);
+		setCountdown(3);
+		setIsCountdownActive(true);
+		setGameStarted(true);
 	};
 
 	const resetGame = () => {
@@ -84,6 +86,8 @@ function App() {
 		setGameStarted(true);
 		setShowResults(false);
 		setKeystrokes({ total: 0, correct: 0, incorrect: 0 });
+		setCountdown(3);
+		setIsCountdownActive(true);
 	};
 
 	const goToHome = () => {
@@ -97,6 +101,8 @@ function App() {
 		setTimeRemaining(null);
 		setShowResults(false);
 		setKeystrokes({ total: 0, correct: 0, incorrect: 0 });
+		setIsMultiplayer(false);
+		navigate("/");
 	};
 
 	const handleMultiplayerClick = () => {
@@ -106,7 +112,21 @@ function App() {
 	};
 
 	useEffect(() => {
-		if (!startTime || !timeRemaining) return;
+		if (isCountdownActive && countdown > 0) {
+			const countdownTimer = setInterval(() => {
+				setCountdown((prev) => prev - 1);
+			}, 1000);
+
+			return () => clearInterval(countdownTimer);
+		} else if (countdown === 0) {
+			setIsCountdownActive(false);
+			setStartTime(Date.now());
+			setTimeRemaining(selectedTimer);
+		}
+	}, [countdown, isCountdownActive, selectedTimer]);
+
+	useEffect(() => {
+		if (!startTime || !timeRemaining || isCountdownActive) return;
 
 		const timer = setInterval(() => {
 			const elapsedTime = (Date.now() - startTime) / 1000;
@@ -121,7 +141,7 @@ function App() {
 		}, 1000);
 
 		return () => clearInterval(timer);
-	}, [startTime, timeRemaining, selectedTimer]);
+	}, [startTime, timeRemaining, selectedTimer, isCountdownActive]);
 
 	return (
 		<div className='app'>
@@ -141,6 +161,7 @@ function App() {
 									<option value='javascript'>JavaScript</option>
 									<option value='python'>Python</option>
 									<option value='java'>Java</option>
+									<option value='text'>Normal Text</option>
 								</select>
 							</div>
 							<div className='timer-selector'>
@@ -186,17 +207,19 @@ function App() {
 				<div className='game-container'>
 					<div className='game-header'>
 						<h1>Code Typing Game</h1>
-						{!isMultiplayer && (
+						{!isMultiplayer && !isCountdownActive && (
 							<div className='timer-display'>
 								Time Remaining: {timeRemaining}s
 							</div>
 						)}
 						<div className='button-group'>
-							<button
-								className='reset-button'
-								onClick={resetGame}>
-								New Game
-							</button>
+							{!isMultiplayer && (
+								<button
+									className='reset-button'
+									onClick={resetGame}>
+									New Game
+								</button>
+							)}
 							<button
 								className='home-button'
 								onClick={goToHome}>

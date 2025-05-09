@@ -15,9 +15,14 @@ function PlayerRoom({ onStartGame }) {
 		const isUserHost = !window.location.href.includes("/join/");
 		setIsHost(isUserHost);
 
+		const username = localStorage.getItem("username");
+		if (isUserHost) {
+			setPlayers([{ username, isHost: true }]);
+		}
+
 		wsService.connect(roomIdFromUrl);
 		wsService.sendReady({
-			username: localStorage.getItem("username"),
+			username: username,
 			isHost: isUserHost,
 		});
 
