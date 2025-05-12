@@ -2,19 +2,25 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	min-height: 100vh;
+	height: 100vh;
 	background-color: #1e1e1e;
-	padding: 2rem;
+	padding: 1rem;
+	width: 100%;
+	max-width: 1200px;
+	margin: 0 auto;
+	box-sizing: border-box;
 }
 
 .player-room-content {
 	background-color: #2d2d2d;
-	padding: 2.5rem;
+	padding: 2rem;
 	border-radius: 8px;
 	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 	width: 100%;
 	max-width: 600px;
 	text-align: center;
+	max-height: 90vh;
+	overflow-y: auto;
 }
 
 .player-room-content h1 {
