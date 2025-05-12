@@ -19,8 +19,7 @@
 	width: 100%;
 	max-width: 800px;
 	text-align: center;
-	max-height: 90vh;
-	overflow-y: auto;
+	margin-top: -10vh;
 }
 
 .waiting-room-content h1 {
